@@ -40,7 +40,6 @@ public class ConversionService {
                 "output-",
                 "." + outputFormat.getExtension()
         );
-
         try {
             converterRegistry.get(inputFormat, outputFormat)
                     .orElseThrow(() -> new UnsupportedOperationException(

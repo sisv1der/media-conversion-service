@@ -28,7 +28,7 @@ public class ConversionController {
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename = \"converted." + outputFormat.name().toLowerCase() + "\""
+                        "attachment; filename=\"converted." + outputFormat.name().toLowerCase() + "\""
                 ).body(outputFile);
     }
 }

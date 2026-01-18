@@ -20,9 +20,11 @@ class Mp4SignatureValidator implements SignatureValidator {
     public boolean isValid(Path file) {
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(file.toFile())) {
             grabber.start();
-            grabber.stop();
+            boolean hasVideo = grabber.getLengthInFrames() > 0 || grabber.getVideoCodec() != 0;
+            boolean formatOk = grabber.getFormat() != null && grabber.getFormat().contains("mp4");
 
-            return true;
+            grabber.stop();
+            return hasVideo && formatOk;
         } catch (FrameGrabber.Exception e) {
             return false;
         }

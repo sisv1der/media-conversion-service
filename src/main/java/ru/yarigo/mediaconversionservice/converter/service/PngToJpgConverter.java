@@ -6,6 +6,7 @@ import ru.yarigo.mediaconversionservice.converter.Converter;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,6 +22,23 @@ public class PngToJpgConverter implements Converter {
     @Override
     public void convert(Path inputPath, Path outputPath) throws IOException {
         BufferedImage image = ImageIO.read(inputPath.toFile());
-        ImageIO.write(image, "jpg", outputPath.toFile());
+        if (image == null) {
+            throw new IllegalStateException("Не удалось прочитать изображение");
+        }
+
+        BufferedImage rgb = new BufferedImage(
+                image.getWidth(),
+                image.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        Graphics2D g = rgb.createGraphics();
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+
+        boolean ok = ImageIO.write(rgb, "jpg", outputPath.toFile());
+        if (!ok) {
+            throw new IllegalStateException("ImageIO не смог записать JPG");
+        }
     }
 }

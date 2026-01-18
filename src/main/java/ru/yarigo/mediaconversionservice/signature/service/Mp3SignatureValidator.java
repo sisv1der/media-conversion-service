@@ -20,9 +20,10 @@ class Mp3SignatureValidator implements SignatureValidator {
     public boolean isValid(Path file) {
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(file.toFile())) {
             grabber.start();
-            grabber.stop();
+            boolean formatOk = grabber.getFormat() != null && grabber.getFormat().contains("mp3");
 
-            return true;
+            grabber.stop();
+            return formatOk;
         } catch (FrameGrabber.Exception e) {
             return false;
         }
