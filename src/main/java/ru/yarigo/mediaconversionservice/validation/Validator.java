@@ -1,10 +1,10 @@
-package ru.yarigo.mediaconversionservice.signature;
+package ru.yarigo.mediaconversionservice.validation;
 
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import java.nio.file.Path;
 
-public interface SignatureValidator {
+public interface Validator {
 
     MediaFormat mediaFormat();
 

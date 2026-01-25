@@ -1,15 +1,15 @@
-package ru.yarigo.mediaconversionservice.signature.service;
+package ru.yarigo.mediaconversionservice.validation.service;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.signature.SignatureValidator;
+import ru.yarigo.mediaconversionservice.validation.Validator;
 
 import java.nio.file.Path;
 
 @Service
-class Mp4SignatureValidator implements SignatureValidator {
+class Mp4Validator implements Validator {
 
     @Override
     public MediaFormat mediaFormat() {

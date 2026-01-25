@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.converter.service.ConverterRegistry;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.signature.service.SignatureRegistry;
+import ru.yarigo.mediaconversionservice.validation.service.ValidatorRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import java.nio.file.Files;
 public class ConversionService {
 
     private final ConverterRegistry converterRegistry;
-    private final SignatureRegistry signatureRegistry;
+    private final ValidatorRegistry validatorRegistry;
 
     public byte[] convert(
             MultipartFile file,
@@ -29,7 +29,7 @@ public class ConversionService {
         );
         file.transferTo(inputPath);
 
-        var isNotValid = signatureRegistry.get(inputFormat)
+        var isNotValid = validatorRegistry.get(inputFormat)
                 .orElseThrow(UnsupportedOperationException::new)
                 .isNotValid(inputPath);
         if (isNotValid) {

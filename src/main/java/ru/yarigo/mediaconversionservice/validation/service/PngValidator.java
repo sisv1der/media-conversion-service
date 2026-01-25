@@ -1,8 +1,8 @@
-package ru.yarigo.mediaconversionservice.signature.service;
+package ru.yarigo.mediaconversionservice.validation.service;
 
 import org.springframework.stereotype.Component;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.signature.SignatureValidator;
+import ru.yarigo.mediaconversionservice.validation.Validator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Component
-class PngSignatureValidator implements SignatureValidator {
+class PngValidator implements Validator {
 
     private static final byte[] PNG_SIGNATURE = new byte[] {
             (byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47,
