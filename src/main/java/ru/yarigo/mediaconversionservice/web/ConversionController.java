@@ -13,6 +13,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/convert")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500"})
 public class ConversionController {
 
     private final ConversionService conversionService;
