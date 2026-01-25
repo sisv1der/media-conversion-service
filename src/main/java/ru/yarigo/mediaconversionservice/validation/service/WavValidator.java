@@ -5,10 +5,10 @@ import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 import ru.yarigo.mediaconversionservice.validation.Validator;
 
 @Service
-class WebmValidator implements Validator {
+class WavValidator implements Validator {
 
     @Override
     public MediaFormat mediaFormat() {
-        return MediaFormat.WEBM;
+        return MediaFormat.WAV;
     }
 }
