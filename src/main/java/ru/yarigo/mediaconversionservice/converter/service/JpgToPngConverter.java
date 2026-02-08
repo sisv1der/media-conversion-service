@@ -2,17 +2,16 @@ package ru.yarigo.mediaconversionservice.converter.service;
 
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Converter;
+import ru.yarigo.mediaconversionservice.converter.Convertible;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 
 @Service
-class JpgToPngConverter implements Converter {
+class JpgToPngConverter implements Convertible {
 
     @Override
     public ConversionKey key() {

@@ -3,13 +3,13 @@ package ru.yarigo.mediaconversionservice.converter.service;
 import org.bytedeco.javacv.*;
 import org.springframework.stereotype.Component;
 import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Converter;
+import ru.yarigo.mediaconversionservice.converter.Convertible;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import java.nio.file.Path;
 
 @Component
-public class Mp3ToWavConverter implements Converter {
+public class Mp3ToWavConverter implements Convertible {
 
     @Override
     public ConversionKey key() {

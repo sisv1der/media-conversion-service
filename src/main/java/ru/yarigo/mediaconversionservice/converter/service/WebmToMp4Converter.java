@@ -4,13 +4,13 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Converter;
+import ru.yarigo.mediaconversionservice.converter.Convertible;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import java.nio.file.Path;
 
 @Service
-class WebmToMp4Converter implements Converter {
+class WebmToMp4Converter implements Convertible {
 
     @Override
     public ConversionKey key() {
