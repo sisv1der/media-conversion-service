@@ -2,6 +2,7 @@ package ru.yarigo.mediaconversionservice.converter;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 
 public interface Converter {
 
@@ -11,4 +12,12 @@ public interface Converter {
             Path inputPath,
             Path outputPath
     ) throws IOException;
+
+    default void convert(
+            Path inputPath,
+            Path outputPath,
+            Map<String, String> params
+    ) {
+        throw new UnsupportedOperationException();
+    }
 }
