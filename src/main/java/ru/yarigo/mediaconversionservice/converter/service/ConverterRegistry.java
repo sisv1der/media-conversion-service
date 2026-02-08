@@ -2,7 +2,7 @@ package ru.yarigo.mediaconversionservice.converter.service;
 
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Converter;
+import ru.yarigo.mediaconversionservice.converter.Convertible;
 import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import java.util.List;
@@ -14,17 +14,17 @@ import java.util.stream.Collectors;
 @Service
 public class ConverterRegistry {
 
-    private final Map<ConversionKey, Converter> converterMap;
+    private final Map<ConversionKey, Convertible> converterMap;
 
-    public ConverterRegistry(List<Converter> converterList) {
+    public ConverterRegistry(List<Convertible> converterList) {
         this.converterMap = converterList.stream()
                 .collect(Collectors.toMap(
-                        Converter::key,
+                        Convertible::key,
                         Function.identity()
                 ));
     }
 
-    public Optional<Converter> get(MediaFormat in, MediaFormat out) {
+    public Optional<Convertible> get(MediaFormat in, MediaFormat out) {
         return Optional.ofNullable(converterMap.get(new ConversionKey(in, out)));
     }
 }

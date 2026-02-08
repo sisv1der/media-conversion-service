@@ -2,14 +2,12 @@ package ru.yarigo.mediaconversionservice.converter.service;
 
 import org.bytedeco.javacv.*;
 import org.springframework.stereotype.Component;
-import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Converter;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
+import ru.yarigo.mediaconversionservice.converter.*;
 
 import java.nio.file.Path;
 
 @Component
-public class Mp3ToWavConverter implements Converter {
+public class Mp3ToWavConverter implements Convertible {
 
     @Override
     public ConversionKey key() {
@@ -21,37 +19,16 @@ public class Mp3ToWavConverter implements Converter {
             Path inputPath,
             Path outputPath
     ) throws FrameGrabber.Exception, FFmpegFrameRecorder.Exception {
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputPath.toFile());
-        FFmpegFrameRecorder recorder = null;
-        try {
-            grabber.start();
+        RecorderFactory recorderFactory = (_, g) -> new FFmpegFrameRecorder(
+                outputPath.toFile(),
+                g.getAudioChannels()
+        );
 
-            recorder = new FFmpegFrameRecorder(
-                    outputPath.toFile(),
-                    grabber.getAudioChannels()
-            );
-
-            recorder.setAudioChannels(grabber.getAudioChannels());
-            recorder.setSampleRate(grabber.getSampleRate());
-            recorder.setAudioCodecName("pcm_s16le");
-            recorder.setFormat("wav");
-            recorder.start();
-
-            Frame frame;
-            while ((frame = grabber.grab()) != null) {
-                if (frame.samples != null) {
-                    recorder.record(frame);
-                }
-            }
-        } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (recorder != null) {
-                recorder.stop();
-                recorder.release();
-            }
-            grabber.stop();
-            grabber.release();
-        }
+        new FfmpegPipeline(inputPath, outputPath, recorderFactory)
+                    .step((g, r) -> r.setAudioChannels(g.getAudioChannels()))
+                    .step((g, r) -> r.setSampleRate(g.getSampleRate()))
+                    .step(r -> r.setAudioCodecName("pcm_s16le"))
+                    .step(r -> r.setFormat("wav"))
+                    .convert();
     }
 }

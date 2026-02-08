@@ -3,7 +3,7 @@ package ru.yarigo.mediaconversionservice.converter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public interface Converter {
+public interface Convertible {
 
     ConversionKey key();
 
