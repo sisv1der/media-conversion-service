@@ -3,9 +3,7 @@ package ru.yarigo.mediaconversionservice.converter.service;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.*;
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Convertible;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
+import ru.yarigo.mediaconversionservice.converter.*;
 
 import java.nio.file.Path;
 
@@ -22,45 +20,25 @@ class WebmToMp4Converter implements Convertible {
             Path inputPath,
             Path outputPath
     ) throws FFmpegFrameGrabber.Exception, FFmpegFrameRecorder.Exception {
-        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputPath.toFile());
-        FFmpegFrameRecorder recorder = null;
-        try {
-            grabber.start();
+        RecorderFactory recorderFactory = (_, g) -> new FFmpegFrameRecorder(
+                outputPath.toFile(),
+                g.getImageWidth(),
+                g.getImageHeight()
+        );
 
-            recorder = new FFmpegFrameRecorder(
-                    outputPath.toFile(),
-                    grabber.getImageWidth(),
-                    grabber.getImageHeight()
-            );
-
-            recorder.setFormat("mp4");
-
-            recorder.setVideoCodecName("libx264");
-            recorder.setFrameRate(grabber.getFrameRate());
-            recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-            recorder.setVideoOption("crf", "22");
-
-            if (grabber.hasAudio()) {
-                recorder.setAudioCodecName("aac");
-                recorder.setAudioChannels(grabber.getAudioChannels());
-                recorder.setSampleRate(48000);
-            }
-
-            recorder.start();
-
-            Frame frame;
-            while ((frame = grabber.grab()) != null) {
-                recorder.record(frame);
-            }
-        } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (recorder != null) {
-                recorder.stop();
-                recorder.release();
-            }
-            grabber.stop();
-            grabber.release();
-        }
+        new FfmpegPipeline(inputPath, outputPath, recorderFactory)
+                .step(r -> r.setVideoCodecName("libx264"))
+                .step(r -> r.setFormat("mp4"))
+                .step(r -> r.setPixelFormat(avutil.AV_PIX_FMT_YUV420P))
+                .step(r -> r.setVideoOption("crf", "22"))
+                .step((g, r) -> r.setFrameRate(g.getFrameRate()))
+                .step((g, r) -> {
+                    if (g.hasAudio()) {
+                        r.setAudioCodecName("aac");
+                        r.setAudioChannels(g.getAudioChannels());
+                        r.setSampleRate(48000);
+                    }
+                })
+                .convert();
     }
 }
