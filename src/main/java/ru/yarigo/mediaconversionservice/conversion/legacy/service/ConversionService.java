@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.service;
+package ru.yarigo.mediaconversionservice.conversion.legacy.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;

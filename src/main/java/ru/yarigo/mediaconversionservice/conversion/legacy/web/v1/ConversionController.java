@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.web.v1;
+package ru.yarigo.mediaconversionservice.conversion.legacy.web.v1;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.conversion.service.ConversionService;
+import ru.yarigo.mediaconversionservice.conversion.legacy.service.ConversionService;
 
 import java.io.IOException;
 
