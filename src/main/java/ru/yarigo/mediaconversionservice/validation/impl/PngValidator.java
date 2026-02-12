@@ -1,7 +1,7 @@
-package ru.yarigo.mediaconversionservice.validation.service;
+package ru.yarigo.mediaconversionservice.validation.impl;
 
-import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
+import org.springframework.stereotype.Component;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.validation.Validator;
 
 import java.io.IOException;
@@ -9,16 +9,17 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Service
-class JpgValidator implements Validator {
+@Component
+class PngValidator implements Validator {
 
-    private static final byte[] JPEG_SIGNATURE = new byte[] {
-            (byte) 0xFF, (byte) 0xD8, (byte) 0xFF
+    private static final byte[] PNG_SIGNATURE = new byte[] {
+            (byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47,
+            (byte) 0x0D, (byte) 0x0A, (byte) 0x1A, (byte) 0x0A
     };
 
     @Override
     public MediaFormat mediaFormat() {
-        return MediaFormat.JPG;
+        return MediaFormat.PNG;
     }
 
     @Override
@@ -33,8 +34,8 @@ class JpgValidator implements Validator {
             return false;
         }
 
-        for (int i = 0; i < JPEG_SIGNATURE.length; i++) {
-            if (header[i] != JPEG_SIGNATURE[i]) {
+        for (int i = 0; i < PNG_SIGNATURE.length; i++) {
+            if (header[i] != PNG_SIGNATURE[i]) {
                 return false;
             }
         }

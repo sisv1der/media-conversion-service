@@ -1,17 +1,17 @@
-package ru.yarigo.mediaconversionservice.web;
+package ru.yarigo.mediaconversionservice.conversion.web.v1;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.service.ConversionService;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.service.ConversionService;
 
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/convert")
+@RequestMapping("/api/v1/convert")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500"})
 public class ConversionController {

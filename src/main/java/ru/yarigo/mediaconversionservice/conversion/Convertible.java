@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.converter;
+package ru.yarigo.mediaconversionservice.conversion;
 
 import java.io.IOException;
 import java.nio.file.Path;

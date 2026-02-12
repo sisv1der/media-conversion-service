@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.converter;
+package ru.yarigo.mediaconversionservice.conversion.engine;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;

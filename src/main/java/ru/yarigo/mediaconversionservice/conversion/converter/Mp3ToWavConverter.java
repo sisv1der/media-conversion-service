@@ -1,8 +1,10 @@
-package ru.yarigo.mediaconversionservice.converter.service;
+package ru.yarigo.mediaconversionservice.conversion.converter;
 
 import org.bytedeco.javacv.*;
 import org.springframework.stereotype.Component;
-import ru.yarigo.mediaconversionservice.converter.*;
+import ru.yarigo.mediaconversionservice.conversion.*;
+import ru.yarigo.mediaconversionservice.conversion.engine.FfmpegPipeline;
+import ru.yarigo.mediaconversionservice.conversion.engine.RecorderFactory;
 
 import java.nio.file.Path;
 
