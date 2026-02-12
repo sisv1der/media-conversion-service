@@ -1,8 +1,7 @@
-package ru.yarigo.mediaconversionservice.validation.service;
+package ru.yarigo.mediaconversionservice.validation;
 
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.validation.Validator;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 
 import java.util.List;
 import java.util.Map;

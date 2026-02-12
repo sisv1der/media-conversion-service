@@ -1,9 +1,9 @@
-package ru.yarigo.mediaconversionservice.converter.service;
+package ru.yarigo.mediaconversionservice.conversion.converter;
 
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Convertible;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.ConversionKey;
+import ru.yarigo.mediaconversionservice.conversion.Convertible;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

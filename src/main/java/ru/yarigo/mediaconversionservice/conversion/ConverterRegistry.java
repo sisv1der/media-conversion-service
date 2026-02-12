@@ -1,9 +1,6 @@
-package ru.yarigo.mediaconversionservice.converter.service;
+package ru.yarigo.mediaconversionservice.conversion;
 
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.converter.ConversionKey;
-import ru.yarigo.mediaconversionservice.converter.Convertible;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
 
 import java.util.List;
 import java.util.Map;

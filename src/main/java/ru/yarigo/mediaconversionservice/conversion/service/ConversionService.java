@@ -1,12 +1,12 @@
-package ru.yarigo.mediaconversionservice.service;
+package ru.yarigo.mediaconversionservice.conversion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yarigo.mediaconversionservice.converter.service.ConverterRegistry;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
-import ru.yarigo.mediaconversionservice.validation.service.ValidatorRegistry;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.ConverterRegistry;
+import ru.yarigo.mediaconversionservice.validation.ValidatorRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
