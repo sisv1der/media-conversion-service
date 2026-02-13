@@ -17,5 +17,4 @@ public enum MediaFormat {
     MediaFormat(String extension) {
         this.extension = extension;
     }
-
 }
