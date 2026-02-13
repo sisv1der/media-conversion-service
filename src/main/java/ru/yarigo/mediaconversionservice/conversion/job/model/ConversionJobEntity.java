@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.model;
+package ru.yarigo.mediaconversionservice.conversion.job.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
