@@ -23,7 +23,7 @@ public class StorageService {
         }
     }
 
-    public InputStream download(String key) throws IOException {
+    public InputStream download(String key) {
         return storageProvider.download(key);
     }
 }
