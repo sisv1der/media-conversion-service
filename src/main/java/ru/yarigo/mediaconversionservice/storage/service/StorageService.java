@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +23,7 @@ public class StorageService {
         }
     }
 
-    public InputStream download(UUID id) {
-        throw new UnsupportedOperationException("Not supported yet.");
-        //TODO: реализовать скачивание
+    public InputStream download(String key) {
+        return storageProvider.download(key);
     }
 }

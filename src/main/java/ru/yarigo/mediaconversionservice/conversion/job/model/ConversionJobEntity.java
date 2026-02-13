@@ -1,7 +1,10 @@
-package ru.yarigo.mediaconversionservice.conversion.model;
+package ru.yarigo.mediaconversionservice.conversion.job.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
@@ -11,6 +14,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "conversion_jobs")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConversionJobEntity {
 
     @Id
