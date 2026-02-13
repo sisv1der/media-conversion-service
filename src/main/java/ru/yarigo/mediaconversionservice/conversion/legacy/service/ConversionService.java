@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.ConverterRegistry;
 import ru.yarigo.mediaconversionservice.validation.ValidatorRegistry;
+import ru.yarigo.mediaconversionservice.validation.service.ValidationService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +17,7 @@ import java.nio.file.Files;
 public class ConversionService {
 
     private final ConverterRegistry converterRegistry;
-    private final ValidatorRegistry validatorRegistry;
+    private final ValidationService validationService;
 
     public byte[] convert(
             MultipartFile file,
@@ -29,9 +30,7 @@ public class ConversionService {
         );
         file.transferTo(inputPath);
 
-        var isNotValid = validatorRegistry.get(inputFormat)
-                .orElseThrow(UnsupportedOperationException::new)
-                .isNotValid(inputPath);
+        var isNotValid = validationService.isNotValid(inputPath, inputFormat);
         if (isNotValid) {
             throw new BadRequestException("Неверная сигнатура файла");
         }
