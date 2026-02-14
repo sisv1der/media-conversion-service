@@ -26,4 +26,8 @@ public class StorageService {
     public InputStream download(String key) {
         return storageProvider.download(key);
     }
+
+    public void delete(String key) {
+        storageProvider.delete(key);
+    }
 }
