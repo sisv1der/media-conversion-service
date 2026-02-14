@@ -13,6 +13,11 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
+                  name: filename
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
                   name: input_s3_key
                   type: text
                   constraints:

@@ -23,6 +23,9 @@ public class JobEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
+    private String filename;
+
     @Column(nullable = false, name = "input_s3_key")
     private String inputS3Key;
 
