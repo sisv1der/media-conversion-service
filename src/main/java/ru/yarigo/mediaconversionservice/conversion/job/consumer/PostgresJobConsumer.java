@@ -2,6 +2,7 @@ package ru.yarigo.mediaconversionservice.conversion.job.consumer;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobEntity;
@@ -37,6 +38,7 @@ public class PostgresJobConsumer implements JobConsumer {
         this.conversionService = conversionService;
     }
 
+    @Scheduled(fixedRate = 5000)
     @Override
     public void process() {
         int JOB_LIMIT = 10;
