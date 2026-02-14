@@ -73,6 +73,7 @@ public class JobService {
             var inputKey = KeyGenerator.inputKey(jobId, file.getOriginalFilename());
             var job = JobEntity.builder()
                     .id(jobId)
+                    .filename(file.getOriginalFilename())
                     .inputS3Key(inputKey)
                     .inputFormat(getFormat(inputFormat))
                     .outputFormat(getFormat(outputFormat))
