@@ -64,3 +64,11 @@ databaseChangeLog:
             columns:
               - column:
                   name: status
+        - createIndex:
+            tableName: conversion_jobs
+            indexName: idx_conversion_jobs_status_created
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: created_at
