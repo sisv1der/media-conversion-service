@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConversionJobEntity {
+public class JobEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

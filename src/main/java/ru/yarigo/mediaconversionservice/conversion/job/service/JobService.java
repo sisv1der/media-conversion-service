@@ -8,8 +8,8 @@ import org.apache.commons.io.FilenameUtils;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobStatus;
 import ru.yarigo.mediaconversionservice.conversion.job.web.dto.CreateJobResponse;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.conversion.job.model.ConversionJobEntity;
-import ru.yarigo.mediaconversionservice.conversion.job.model.ConversionJobRepository;
+import ru.yarigo.mediaconversionservice.conversion.job.model.JobEntity;
+import ru.yarigo.mediaconversionservice.conversion.job.model.JobRepository;
 import ru.yarigo.mediaconversionservice.conversion.job.web.dto.FileResource;
 import ru.yarigo.mediaconversionservice.conversion.job.web.dto.ReadJobStatusResponse;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
@@ -24,11 +24,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobService {
 
-    private final ConversionJobRepository jobRepository;
+    private final JobRepository jobRepository;
     private final ValidationService validationService;
     private final StorageService storageService;
 
-    public FileResource getFileByJobId(UUID jobId) throws IOException {
+    public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new EntityNotFoundException("Job not found"));
 
@@ -71,7 +71,7 @@ public class JobService {
             }
             var jobId = UUID.randomUUID();
             var inputKey = KeyGenerator.inputKey(jobId, file.getOriginalFilename());
-            var job = ConversionJobEntity.builder()
+            var job = JobEntity.builder()
                     .id(jobId)
                     .inputS3Key(inputKey)
                     .inputFormat(getFormat(inputFormat))
