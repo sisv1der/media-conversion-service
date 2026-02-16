@@ -2,6 +2,7 @@ package ru.yarigo.mediaconversionservice.conversion;
 
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
+import ru.yarigo.mediaconversionservice.conversion.exception.UnsupportedMediaFormatException;
 
 import java.util.Arrays;
 
@@ -21,18 +22,12 @@ public enum MediaFormat {
         this.extension = extension;
     }
 
-    public static MediaFormat getMediaFormat(String filename) {
+    public static MediaFormat getMediaFormat(String filename) throws  UnsupportedMediaFormatException {
         var extension = FilenameUtils.getExtension(filename).toLowerCase().replaceAll("^\\.", "");
 
         return Arrays.stream(MediaFormat.values())
                 .filter(format -> format.getExtension().equals(extension))
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedMediaFormatException("Extension " + extension + " is not supported"));
-    }
-
-    private static class UnsupportedMediaFormatException extends RuntimeException {
-        private UnsupportedMediaFormatException(String message) {
-            super(message);
-        }
     }
 }
