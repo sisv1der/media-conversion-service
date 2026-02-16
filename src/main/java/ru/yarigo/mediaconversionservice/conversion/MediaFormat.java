@@ -1,6 +1,9 @@
 package ru.yarigo.mediaconversionservice.conversion;
 
 import lombok.Getter;
+import org.apache.commons.io.FilenameUtils;
+
+import java.util.Arrays;
 
 @Getter
 public enum MediaFormat {
@@ -16,5 +19,20 @@ public enum MediaFormat {
 
     MediaFormat(String extension) {
         this.extension = extension;
+    }
+
+    public static MediaFormat getMediaFormat(String filename) {
+        var extension = FilenameUtils.getExtension(filename).toLowerCase().replaceAll("^\\.", "");
+
+        return Arrays.stream(MediaFormat.values())
+                .filter(format -> format.getExtension().equals(extension))
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedMediaFormatException("Extension " + extension + " is not supported"));
+    }
+
+    private static class UnsupportedMediaFormatException extends RuntimeException {
+        private UnsupportedMediaFormatException(String message) {
+            super(message);
+        }
     }
 }

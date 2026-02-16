@@ -1,10 +1,9 @@
 package ru.yarigo.mediaconversionservice.conversion.job.consumer;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormatMapper;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobEntity;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobRepository;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobStatus;
@@ -15,7 +14,6 @@ import ru.yarigo.mediaconversionservice.storage.service.StorageService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -26,16 +24,19 @@ public class PostgresJobConsumer implements JobConsumer {
     private final Executor executor;
     private final StorageService storageService;
     private final ConversionService conversionService;
+    private final MediaFormatMapper mediaFormatMapper;
 
     public PostgresJobConsumer(
             JobRepository jobRepository,
             @Qualifier("conversionExecutor") Executor executor,
             StorageService storageService,
-            ConversionService conversionService) {
+            ConversionService conversionService,
+            MediaFormatMapper mediaFormatMapper) {
         this.jobRepository = jobRepository;
         this.executor = executor;
         this.storageService = storageService;
         this.conversionService = conversionService;
+        this.mediaFormatMapper = mediaFormatMapper;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -56,9 +57,10 @@ public class PostgresJobConsumer implements JobConsumer {
     }
 
     private void processJob(JobEntity job) throws IOException {
+        var inputFormat = mediaFormatMapper.map(job.getInputFormat());
         var inputPath = Files.createTempFile(
                 "processing-",
-                "." + getInputFormat(job.getFilename())
+                "." + inputFormat.getExtension()
         );
         try (var inputStream = storageService.download(job.getInputS3Key())) {
             Files.copy(inputStream, inputPath, StandardCopyOption.REPLACE_EXISTING);
@@ -67,20 +69,14 @@ public class PostgresJobConsumer implements JobConsumer {
             Files.deleteIfExists(inputPath);
             throw new RuntimeException(e);
         }
+        var outputFormat = mediaFormatMapper.map(job.getOutputFormat());
         var outputPath = Files.createTempFile(
                 "processing-output-",
-                "." + getInputFormat(job.getFilename())
+                "." + outputFormat.getExtension()
         );
 
         try {
-            conversionService.convert(
-                    inputPath,
-                    outputPath,
-                    getInputFormat(job.getFilename()),
-                    getFormat(getExtension("a." + job.getOutputFormat().name().toLowerCase()))
-                    //  Тут костыль: из-за того, что существует 2 разных MediaFormat
-                    //      мне приходится вот так криво получать нужный (доменный) MediaFormat из JPA-специфичного enum
-            );
+            conversionService.convert(inputPath, outputPath, inputFormat, outputFormat);
 
             var outputKey = KeyGenerator.outputKey(
                     job.getId(),
@@ -99,34 +95,6 @@ public class PostgresJobConsumer implements JobConsumer {
             Files.deleteIfExists(outputPath);
         }
     }
-
-    private MediaFormat getInputFormat(String filename) {
-        var extension = getExtension(filename);
-        return getFormat(extension);
-    }
-
-    private MediaFormat getFormat(String extension) {
-        if (extension == null || extension.isEmpty()) {
-            return null;
-        }
-
-        String ext = extension.toLowerCase().replaceAll("^\\.", "");
-
-        return Arrays.stream(MediaFormat.values())
-                .filter(format -> format.getExtension().equals(ext))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid extension: " + ext));
-    }
-
-    private static String getExtension(String filename) {
-        if (filename == null) {
-            return "";
-        }
-        return FilenameUtils.getExtension(filename);
-    }
-
-    // TODO: ОЧЕНЬ требуется сделать маппер между доменным и инфраструктурными MediaFormat
-    //      Код для конверсии уже второй раз копипастится между классами
 
     private void markFailed(JobEntity jobEntity) {
         jobEntity.setStatus(JobStatus.FAILED);
