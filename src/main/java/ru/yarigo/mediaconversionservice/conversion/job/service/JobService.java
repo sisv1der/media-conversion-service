@@ -4,10 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.commons.io.FilenameUtils;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormatMapper;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobStatus;
 import ru.yarigo.mediaconversionservice.conversion.job.web.dto.CreateJobResponse;
-import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobEntity;
 import ru.yarigo.mediaconversionservice.conversion.job.model.JobRepository;
 import ru.yarigo.mediaconversionservice.conversion.job.web.dto.FileResource;
@@ -17,7 +17,6 @@ import ru.yarigo.mediaconversionservice.validation.service.ValidationService;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.UUID;
 
 @Service
@@ -27,6 +26,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final ValidationService validationService;
     private final StorageService storageService;
+    private final MediaFormatMapper mediaFormatMapper;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -35,7 +35,7 @@ public class JobService {
         if (job.getStatus() == JobStatus.DONE) {
             return new FileResource(
                     storageService.download(job.getOutputS3Key()),
-                    getFormat(job.getOutputFormat().name())
+                    mediaFormatMapper.map(job.getOutputFormat())
             );
         }
         throw new IllegalStateException("Job has not been done"); // 425 Too Early
@@ -57,9 +57,9 @@ public class JobService {
 
     public CreateJobResponse create(
             MultipartFile file,
-            MediaFormat outputFormat
+            ru.yarigo.mediaconversionservice.conversion.MediaFormat outputFormat
     ) throws IOException {
-        var inputFormat = getInputFormat(file.getOriginalFilename());
+        var inputFormat = MediaFormat.getMediaFormat(file.getOriginalFilename());
         var inputPath = Files.createTempFile(
                 "input-",
                 "." + inputFormat.getExtension()
@@ -75,8 +75,8 @@ public class JobService {
                     .id(jobId)
                     .filename(file.getOriginalFilename())
                     .inputS3Key(inputKey)
-                    .inputFormat(getFormat(inputFormat))
-                    .outputFormat(getFormat(outputFormat))
+                    .inputFormat(mediaFormatMapper.map(inputFormat))
+                    .outputFormat(mediaFormatMapper.map(outputFormat))
                     .build();
 
             storageService.upload(inputKey, inputPath);
@@ -88,40 +88,4 @@ public class JobService {
             Files.deleteIfExists(inputPath);
         }
     }
-
-    private MediaFormat getInputFormat(String filename) {
-        var extension = getExtension(filename);
-        return getFormat(extension);
-    }
-    
-    private ru.yarigo.mediaconversionservice.conversion.job.model.MediaFormat getFormat(MediaFormat format) {
-        return ru.yarigo.mediaconversionservice.conversion.job.model.MediaFormat.valueOf(format.name());
-    }
-
-    private MediaFormat getFormat(String extension) {
-        if (extension == null || extension.isEmpty()) {
-            return null;
-        }
-
-        String ext = extension.toLowerCase().replaceAll("^\\.", "");
-
-        return Arrays.stream(MediaFormat.values())
-                .filter(format -> format.getExtension().equals(ext))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid extension: " + ext));
-    }
-
-    private static String getExtension(String filename) {
-        if (filename == null) {
-            return "";
-        }
-        return FilenameUtils.getExtension(filename);
-    }
-
-    /*
-     TODO: Заменить прямое преобразование enum на маппер или унифицировать enum.
-           Сейчас используется valueOf(name()), что хрупко.
-           Возможные решения:
-           - Создать MediaFormatMapper (адаптер между слоями)
-    */
 }
