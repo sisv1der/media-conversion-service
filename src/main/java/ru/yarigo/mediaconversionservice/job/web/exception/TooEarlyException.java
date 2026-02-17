@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.web.exception;
+package ru.yarigo.mediaconversionservice.job.web.exception;
 
 public class TooEarlyException extends RuntimeException {
     public TooEarlyException(String message) {

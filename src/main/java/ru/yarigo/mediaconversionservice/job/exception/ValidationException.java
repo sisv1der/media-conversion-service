@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.exception;
+package ru.yarigo.mediaconversionservice.job.exception;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

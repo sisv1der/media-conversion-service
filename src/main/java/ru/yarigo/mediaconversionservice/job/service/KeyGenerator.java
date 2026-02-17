@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.service;
+package ru.yarigo.mediaconversionservice.job.service;
 
 import java.util.UUID;
 

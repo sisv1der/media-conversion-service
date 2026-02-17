@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.web.controller.v2;
+package ru.yarigo.mediaconversionservice.job.web.controller.v2;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.conversion.job.service.JobService;
+import ru.yarigo.mediaconversionservice.job.service.JobService;
 
 import java.io.IOException;
 import java.util.UUID;

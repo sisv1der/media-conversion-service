@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.web.dto;
+package ru.yarigo.mediaconversionservice.job.web.dto;
 
 import java.util.UUID;
 

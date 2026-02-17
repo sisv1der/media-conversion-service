@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import ru.yarigo.mediaconversionservice.conversion.exception.UnsupportedMediaFormatException;
-import ru.yarigo.mediaconversionservice.conversion.job.exception.FileProcessingFailedException;
-import ru.yarigo.mediaconversionservice.conversion.job.exception.JobProcessingException;
-import ru.yarigo.mediaconversionservice.conversion.job.web.exception.TooEarlyException;
+import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
+import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
+import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 
 import java.net.URI;
 import java.time.Instant;

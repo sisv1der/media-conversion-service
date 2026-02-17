@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.consumer;
+package ru.yarigo.mediaconversionservice.job.consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormatMapper;
 import ru.yarigo.mediaconversionservice.conversion.exception.ConversionException;
-import ru.yarigo.mediaconversionservice.conversion.job.exception.JobProcessingException;
-import ru.yarigo.mediaconversionservice.conversion.job.model.JobEntity;
-import ru.yarigo.mediaconversionservice.conversion.job.model.JobRepository;
-import ru.yarigo.mediaconversionservice.conversion.job.model.JobStatus;
+import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
+import ru.yarigo.mediaconversionservice.job.model.JobEntity;
+import ru.yarigo.mediaconversionservice.job.model.JobRepository;
+import ru.yarigo.mediaconversionservice.job.model.JobStatus;
 import ru.yarigo.mediaconversionservice.conversion.service.ConversionService;
-import ru.yarigo.mediaconversionservice.conversion.job.service.KeyGenerator;
+import ru.yarigo.mediaconversionservice.job.service.KeyGenerator;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
 

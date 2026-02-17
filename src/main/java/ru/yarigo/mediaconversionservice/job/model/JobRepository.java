@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.conversion.job.model;
+package ru.yarigo.mediaconversionservice.job.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
