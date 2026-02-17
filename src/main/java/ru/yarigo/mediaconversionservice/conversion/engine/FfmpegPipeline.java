@@ -45,9 +45,7 @@ public class FfmpegPipeline {
 
             Frame frame;
             while ((frame = grabber.grab()) != null) {
-                if (frame.samples != null) {
-                    recorder.record(frame);
-                }
+                recorder.record(frame);
             }
         } catch (FFmpegFrameRecorder.Exception | FFmpegFrameGrabber.Exception e) {
             log.error("FFmpeg conversion failed: input={}, output={}", inputPath, outputPath, e);
