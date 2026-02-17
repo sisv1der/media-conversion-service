@@ -1,11 +1,11 @@
-package ru.yarigo.mediaconversionservice.conversion.job.service;
+package ru.yarigo.mediaconversionservice.conversion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.conversion.ConverterRegistry;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.exception.UnsupportedMediaFormatException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 @Service
@@ -19,9 +19,9 @@ public class ConversionService {
             Path outputPath,
             MediaFormat inputFormat,
             MediaFormat outputFormat
-    ) throws IOException {
+    ) {
         converterRegistry.get(inputFormat, outputFormat)
-                .orElseThrow(() -> new IllegalArgumentException("Input format not supported"))
+                .orElseThrow(() -> new UnsupportedMediaFormatException("Input format not supported"))
                 .convert(inputPath, outputPath);
     }
 }

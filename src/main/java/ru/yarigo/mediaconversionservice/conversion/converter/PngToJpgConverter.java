@@ -1,9 +1,11 @@
 package ru.yarigo.mediaconversionservice.conversion.converter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yarigo.mediaconversionservice.conversion.ConversionKey;
 import ru.yarigo.mediaconversionservice.conversion.Convertible;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.exception.ConversionException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -11,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 
+@Slf4j
 @Component
 public class PngToJpgConverter implements Convertible {
 
@@ -20,10 +23,16 @@ public class PngToJpgConverter implements Convertible {
     }
 
     @Override
-    public void convert(Path inputPath, Path outputPath) throws IOException {
-        BufferedImage image = ImageIO.read(inputPath.toFile());
+    public void convert(Path inputPath, Path outputPath) {
+        BufferedImage image;
+        try {
+            image = ImageIO.read(inputPath.toFile());
+        } catch (IOException e) {
+            log.warn("Error reading image from file {}", inputPath, e);
+            throw new ConversionException("Error reading image " + inputPath, e);
+        }
         if (image == null) {
-            throw new IllegalStateException("Не удалось прочитать изображение");
+            throw new ConversionException("Error reading image " + inputPath);
         }
 
         BufferedImage rgb = new BufferedImage(
@@ -36,9 +45,16 @@ public class PngToJpgConverter implements Convertible {
         g.drawImage(image, 0, 0, null);
         g.dispose();
 
-        boolean ok = ImageIO.write(rgb, "jpg", outputPath.toFile());
+        boolean ok;
+        try {
+            ok = ImageIO.write(rgb, "jpg", outputPath.toFile());
+        } catch (IOException e) {
+            log.warn("Error writing image to file {}", outputPath, e);
+            throw new ConversionException("Error writing image " + outputPath, e);
+        }
         if (!ok) {
-            throw new IllegalStateException("ImageIO не смог записать JPG");
+            log.warn("Error writing image to file {}", outputPath);
+            throw new ConversionException("Error writing image " + outputPath);
         }
     }
 }

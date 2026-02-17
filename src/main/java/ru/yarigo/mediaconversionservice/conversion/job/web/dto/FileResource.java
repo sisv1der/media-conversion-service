@@ -1,7 +1,6 @@
 package ru.yarigo.mediaconversionservice.conversion.job.web.dto;
 
+import org.springframework.core.io.InputStreamResource;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 
-import java.io.InputStream;
-
-public record FileResource(InputStream inputStream, MediaFormat outputFormat) {}
+public record FileResource(InputStreamResource inputStream, MediaFormat outputFormat) {}

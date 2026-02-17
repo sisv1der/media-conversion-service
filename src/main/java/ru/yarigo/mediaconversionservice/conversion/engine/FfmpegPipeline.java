@@ -1,7 +1,9 @@
 package ru.yarigo.mediaconversionservice.conversion.engine;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
+import ru.yarigo.mediaconversionservice.conversion.exception.ConversionException;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@Slf4j
 @RequiredArgsConstructor
 public class FfmpegPipeline {
     private final Path inputPath;
@@ -46,7 +49,11 @@ public class FfmpegPipeline {
                     recorder.record(frame);
                 }
             }
-        } finally {
+        } catch (FFmpegFrameRecorder.Exception | FFmpegFrameGrabber.Exception e) {
+            log.error("FFmpeg conversion failed: input={}, output={}", inputPath, outputPath, e);
+            throw new ConversionException("FFmpeg pipeline error", e);
+        }
+        finally {
             if (recorder != null) {
                 recorder.stop();
                 recorder.release();
