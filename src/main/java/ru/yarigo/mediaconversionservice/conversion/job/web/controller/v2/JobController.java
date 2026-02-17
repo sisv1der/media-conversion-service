@@ -1,7 +1,6 @@
 package ru.yarigo.mediaconversionservice.conversion.job.web.controller.v2;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +35,9 @@ public class JobController {
     }
 
     @GetMapping("/{jobId}/file")
-    public ResponseEntity<?> getFile(@PathVariable UUID jobId) throws IOException {
+    public ResponseEntity<?> getFile(@PathVariable UUID jobId) {
         var response = jobService.getFileByJobId(jobId);
-        InputStreamResource inputStreamResource = new InputStreamResource(response.inputStream());
+        var inputStreamResource = response.inputStream();
 
         return ok()
                 .header(
