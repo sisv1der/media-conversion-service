@@ -16,7 +16,7 @@ public interface JobRepository extends JpaRepository<JobEntity, UUID> {
             value = """
                 UPDATE conversion_jobs
                 SET status = 'PROCESSING'
-                WHERE id = (
+                WHERE id IN (
                     SELECT id
                     FROM conversion_jobs
                     WHERE status = 'PENDING'
