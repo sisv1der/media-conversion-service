@@ -9,6 +9,7 @@ import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.job.service.JobService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -45,5 +46,10 @@ public class JobController {
                         "attachment; filename=\"converted." + response.outputFormat().name().toLowerCase() + "\""
                 )
                 .body(inputStreamResource);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getJobs(@RequestParam List<UUID> ids) {
+        return ok(jobService.getByIds(ids));
     }
 }
