@@ -28,4 +28,6 @@ public interface JobRepository extends JpaRepository<JobEntity, UUID> {
             nativeQuery = true
     )
     List<JobEntity> findByStatus(@Param("limit") int limit);
+
+    List<JobEntity> findByIdIn(List<UUID> ids);
 }
