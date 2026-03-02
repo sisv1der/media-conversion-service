@@ -9,15 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormatMapper;
+import ru.yarigo.mediaconversionservice.job.JobMapper;
 import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.ValidationException;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
-import ru.yarigo.mediaconversionservice.job.web.dto.CreateJobResponse;
+import ru.yarigo.mediaconversionservice.job.web.dto.*;
 import ru.yarigo.mediaconversionservice.job.model.JobEntity;
 import ru.yarigo.mediaconversionservice.job.model.JobRepository;
-import ru.yarigo.mediaconversionservice.job.web.dto.FileResource;
-import ru.yarigo.mediaconversionservice.job.web.dto.ReadJobStatusResponse;
 import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
@@ -27,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -38,6 +38,7 @@ public class JobService {
     private final ValidationService validationService;
     private final StorageService storageService;
     private final MediaFormatMapper mediaFormatMapper;
+    private final JobMapper jobMapper;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -83,6 +84,14 @@ public class JobService {
         } finally {
             deleteFileIfExists(inputPath);
         }
+    }
+
+    public ReadBatchJobStatusResponse getByIds(List<UUID> ids) {
+        var jobs = jobRepository.findByIdIn(ids);
+
+        return new ReadBatchJobStatusResponse(jobs.stream()
+                .map(jobMapper::map)
+                .toList());
     }
 
     private void validateFile(MultipartFile file) {
