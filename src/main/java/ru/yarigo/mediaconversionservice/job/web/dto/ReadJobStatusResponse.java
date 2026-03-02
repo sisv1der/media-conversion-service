@@ -5,5 +5,4 @@ import java.util.UUID;
 public record ReadJobStatusResponse(
         UUID jobId,
         String jobStatus
-) {
-}
+) {}
