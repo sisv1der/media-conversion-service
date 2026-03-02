@@ -16,7 +16,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/api/v2/jobs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500", "http://localhost:5173"})
 public class JobController {
 
     private final JobService jobService;
