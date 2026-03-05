@@ -2,7 +2,7 @@ package ru.yarigo.mediaconversionservice.validation;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
-import ru.yarigo.mediaconversionservice.converter.MediaFormat;
+import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 
 import java.nio.file.Path;
 

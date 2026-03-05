@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet: 
+      id: 001-create-tables
+      author: Ivan-Yarigo
+      changes:
+        - createTable:
+            tableName: conversion_jobs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: filename
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: input_s3_key
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: output_s3_key
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: input_format
+                  type: media_format
+                  constraints:
+                    nullable: false
+              - column:
+                  name: output_format
+                  type: media_format
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: job_status
+                  constraints:
+                    nullable: false
+                  defaultValue: "PENDING"
+              - column:
+                  name: error_message
+                  type: text
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: processed_at
+                  type: timestamptz
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: 003-add-status-index
+      author: Ivan-Yarigo
+      changes:
+        - createIndex:
+            tableName: conversion_jobs
+            indexName: idx_conversion_jobs_status
+            columns:
+              - column:
+                  name: status
