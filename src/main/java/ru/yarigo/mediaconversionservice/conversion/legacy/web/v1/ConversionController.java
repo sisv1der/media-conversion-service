@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.conversion.legacy.service.ConversionService;
+import ru.yarigo.mediaconversionservice.conversion.legacy.service.ConversionServiceLegacy;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500"})
 public class ConversionController {
 
-    private final ConversionService conversionService;
+    private final ConversionServiceLegacy conversionServiceLegacy;
 
     @PostMapping("")
     public ResponseEntity<?> convert(
@@ -24,7 +24,7 @@ public class ConversionController {
             @RequestParam("inputFormat") MediaFormat inputFormat,
             @RequestParam("outputFormat") MediaFormat outputFormat
     ) throws IOException {
-        var outputFile = conversionService.convert(file, inputFormat, outputFormat);
+        var outputFile = conversionServiceLegacy.convert(file, inputFormat, outputFormat);
 
         return ResponseEntity.ok()
                 .header(

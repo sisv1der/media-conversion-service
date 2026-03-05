@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconversionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.conversion.ConverterRegistry;
-import ru.yarigo.mediaconversionservice.validation.ValidatorRegistry;
 import ru.yarigo.mediaconversionservice.validation.service.ValidationService;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.nio.file.Files;
 
 @Service
 @RequiredArgsConstructor
-public class ConversionService {
+public class ConversionServiceLegacy {
 
     private final ConverterRegistry converterRegistry;
     private final ValidationService validationService;
