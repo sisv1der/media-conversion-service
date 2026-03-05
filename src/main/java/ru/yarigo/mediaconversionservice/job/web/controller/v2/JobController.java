@@ -2,6 +2,7 @@ package ru.yarigo.mediaconversionservice.job.web.controller.v2;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +18,16 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/api/v2/jobs")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5500", "http://localhost:5173"})
+@CrossOrigin(
+        origins = {
+                "http://localhost:3000",
+                "http://localhost:5500",
+                "http://localhost:5173"
+        },
+        exposedHeaders = {
+                "Content-Disposition"
+        }
+)
 public class JobController {
 
     private final JobService jobService;
@@ -41,6 +51,7 @@ public class JobController {
         var inputStreamResource = response.inputStream();
 
         return ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"converted." + response.outputFormat().name().toLowerCase() + "\""
