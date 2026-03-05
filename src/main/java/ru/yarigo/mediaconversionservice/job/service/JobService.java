@@ -128,7 +128,6 @@ public class JobService {
 
         upload(inputKey, inputPath);
         saveToDb(job);
-
         return job;
     }
 
@@ -137,12 +136,16 @@ public class JobService {
             jobRepository.save(job);
         } catch (Exception e) {
             log.error("Error while saving input file into DB: s3-key={}", job.getInputS3Key(), e);
-            try {
-                delete(job.getInputS3Key());
-            } catch (Exception deleteException) {
-                e.addSuppressed(deleteException);
-            }
+            safeDeleteFromS3(job.getInputS3Key(), e);
             throw new JobProcessingException("Error while saving job", e);
+        }
+    }
+
+    private void safeDeleteFromS3(String s3Key, Exception originalException) {
+        try {
+            delete(s3Key);
+        } catch (Exception deleteException) {
+            originalException.addSuppressed(deleteException);
         }
     }
 
