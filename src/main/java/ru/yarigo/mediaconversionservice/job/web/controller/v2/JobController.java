@@ -22,7 +22,8 @@ import static org.springframework.http.ResponseEntity.ok;
         origins = {
                 "http://localhost:3000",
                 "http://localhost:5500",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://svivy.ru"
         },
         exposedHeaders = {
                 "Content-Disposition"
