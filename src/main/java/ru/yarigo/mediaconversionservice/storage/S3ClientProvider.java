@@ -1,9 +1,8 @@
-package ru.yarigo.mediaconversionservice.config;
+package ru.yarigo.mediaconversionservice.storage;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ru.yarigo.mediaconversionservice.config.StorageProperties;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -12,13 +11,13 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 
 import java.net.URI;
 
-@Configuration
-@EnableConfigurationProperties({StorageProperties.class, AppProperties.class})
-@ConditionalOnProperty(name = "storage.type", havingValue = "s3")
-public class MinioConfig {
+@Service
+@RequiredArgsConstructor
+public class S3ClientProvider {
 
-    @Bean
-    public S3Client s3Client(StorageProperties props) {
+    private final StorageProperties props;
+
+    public S3Client s3Client() {
         S3Configuration serviceConfig = S3Configuration.builder()
                 .pathStyleAccessEnabled(props.isPathStyleAccess())
                 .build();
@@ -33,8 +32,7 @@ public class MinioConfig {
                 .build();
     }
 
-    @Bean
-    public ru.yarigo.mediaconversionservice.storage.StorageProvider storageProvider(S3Client s3Client, StorageProperties props) {
-        return new ru.yarigo.mediaconversionservice.storage.S3StorageProvider(s3Client, props.getBucket());
+    public String getBucket() {
+        return props.getBucket();
     }
 }
