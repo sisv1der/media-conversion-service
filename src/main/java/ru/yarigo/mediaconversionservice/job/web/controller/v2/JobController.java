@@ -23,7 +23,8 @@ import static org.springframework.http.ResponseEntity.ok;
                 "http://localhost:3000",
                 "http://localhost:5500",
                 "http://localhost:5173",
-                "https://svivy.ru"
+                "https://svivy.ru",
+                "http://svivy.ru"
         },
         exposedHeaders = {
                 "Content-Disposition"
