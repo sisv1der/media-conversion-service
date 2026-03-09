@@ -18,6 +18,12 @@ public class FfmpegPipeline {
     private final Path outputPath;
     private final RecorderFactory recorderFactory;
     private final List<BiConsumer<FFmpegFrameGrabber, FFmpegFrameRecorder>> steps = new ArrayList<>();
+    private final List<Consumer<FFmpegFrameGrabber>> grabberSteps = new ArrayList<>();
+
+    public FfmpegPipeline grabberStep(Consumer<FFmpegFrameGrabber> step) {
+        grabberSteps.add(step);
+        return this;
+    }
 
     public FfmpegPipeline step(Consumer<FFmpegFrameRecorder> step) {
         steps.add((_, r) -> step.accept(r));
@@ -33,6 +39,12 @@ public class FfmpegPipeline {
         FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputPath.toFile());
         FFmpegFrameRecorder recorder = null;
         try {
+            System.out.println("converting " + inputPath);
+
+            for (var step : grabberSteps) {
+                step.accept(grabber);
+            }
+
             grabber.start();
 
             recorder = recorderFactory.create(outputPath, grabber);

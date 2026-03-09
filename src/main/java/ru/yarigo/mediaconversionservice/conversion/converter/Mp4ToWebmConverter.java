@@ -34,6 +34,7 @@ public class Mp4ToWebmConverter implements Convertible {
     private void convert(Path inputPath, Path outputPath, RecorderFactory recorderFactory) {
         try {
             new FfmpegPipeline(inputPath, outputPath, recorderFactory)
+                    .grabberStep(g -> g.setPixelFormat(avutil.AV_PIX_FMT_YUV420P))
                     .step(r -> r.setVideoCodecName("libvpx-vp9"))
                     .step(r -> r.setFormat("webm"))
                     .step(r -> r.setPixelFormat(avutil.AV_PIX_FMT_YUV420P))
