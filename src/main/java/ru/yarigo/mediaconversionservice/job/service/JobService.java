@@ -21,10 +21,9 @@ import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
 import ru.yarigo.mediaconversionservice.validation.service.ValidationService;
+import ru.yarigo.mediaconversionservice.workspace.FileWorkspace;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +38,7 @@ public class JobService {
     private final StorageService storageService;
     private final MediaFormatMapper mediaFormatMapper;
     private final JobMapper jobMapper;
+    private final FileWorkspace<MultipartFile> workspace;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -67,23 +67,30 @@ public class JobService {
             ru.yarigo.mediaconversionservice.conversion.MediaFormat outputFormat
     ) {
         var inputFormat = MediaFormat.getMediaFormat(file.getOriginalFilename());
-        var inputPath = createTempFile(
+        var job = workspace.execute(
+                file,
                 "input-",
-                "." + inputFormat.getExtension()
-        );
-        try {
-            validateFile(file);
-            file.transferTo(inputPath);
-            validateBeforeConversion(inputPath, inputFormat);
+                "." + inputFormat.getExtension(),
+                inputPath -> {
 
-            var job = save(inputPath, file.getOriginalFilename(), inputFormat, outputFormat);
+                    validateFile(file);
+                    validateBeforeConversion(inputPath, outputFormat);
 
-            return new CreateJobResponse(job.getId(), JobStatus.PENDING.name());
-        } catch (IOException | ValidationException e) {
-            throw new JobProcessingException("Error converting input file " + inputPath, e);
-        } finally {
-            deleteFileIfExists(inputPath);
-        }
+                    var jobId = UUID.randomUUID();
+                    var inputKey = KeyGenerator.inputKey(jobId, file.getOriginalFilename());
+                    var jobEntity = JobEntity.builder()
+                            .id(jobId)
+                            .filename(file.getOriginalFilename())
+                            .inputS3Key(inputKey)
+                            .inputFormat(mediaFormatMapper.map(inputFormat))
+                            .outputFormat(mediaFormatMapper.map(outputFormat))
+                            .build();
+
+
+                    return save(inputPath, jobEntity);
+        });
+
+        return new CreateJobResponse(job.getId(), JobStatus.PENDING.name());
     }
 
     public ReadBatchJobStatusResponse getByIds(List<UUID> ids) {
@@ -112,21 +119,9 @@ public class JobService {
 
     private JobEntity save(
             Path inputPath,
-            String filename,
-            MediaFormat inputFormat,
-            MediaFormat outputFormat
+            JobEntity job
     ) {
-        var jobId = UUID.randomUUID();
-        var inputKey = KeyGenerator.inputKey(jobId, filename);
-        var job = JobEntity.builder()
-                .id(jobId)
-                .filename(filename)
-                .inputS3Key(inputKey)
-                .inputFormat(mediaFormatMapper.map(inputFormat))
-                .outputFormat(mediaFormatMapper.map(outputFormat))
-                .build();
-
-        upload(inputKey, inputPath);
+        upload(job.getInputS3Key(), inputPath);
         saveToDb(job);
         return job;
     }
@@ -170,23 +165,6 @@ public class JobService {
             storageService.upload(key, path);
         } catch (S3StorageException e) {
             throw new JobProcessingException("Error uploading output file " + key, e);
-        }
-    }
-
-    private Path createTempFile(String prefix, String suffix) {
-        try {
-            return Files.createTempFile(prefix, suffix);
-        } catch (IOException e) {
-            log.warn("Failed to create temporary file {}", prefix, e);
-            throw new JobProcessingException("Error creating temporary file", e);
-        }
-    }
-
-    private void deleteFileIfExists(Path path) {
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            log.warn("Failed to delete temporary file {}", path, e);
         }
     }
 }
