@@ -3,6 +3,7 @@ package ru.yarigo.mediaconversionservice.job.service;
 import java.util.UUID;
 
 public class KeyGenerator {
+
     public static String inputKey(UUID jobId, String originalFilename) {
         return jobId + "/input/" + sanitize(originalFilename);
     }

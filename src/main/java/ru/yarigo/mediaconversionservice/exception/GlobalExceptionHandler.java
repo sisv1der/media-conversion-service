@@ -11,57 +11,58 @@ import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedExcept
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 
-import java.net.URI;
-import java.time.Instant;
-import java.util.Optional;
+import static ru.yarigo.mediaconversionservice.exception.ProblemDetailProvider.getProblemDetail;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ProblemDetail handleEntityNotFound(EntityNotFoundException ex, WebRequest request) {
-        return buildProblemDetail(HttpStatus.NOT_FOUND, ex, "ENTITY_NOT_FOUND", request);
+    public ProblemDetail handleEntityNotFound(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.NOT_FOUND,
+                "Resource not found",
+                "ENTITY_NOT_FOUND",
+                request
+        );
     }
 
     @ExceptionHandler(FileProcessingFailedException.class)
-    public ProblemDetail handleException(FileProcessingFailedException ex, WebRequest request) {
-        return buildProblemDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex, "FILE_PROCESSING_FAILED", request);
+    public ProblemDetail handleException(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.UNPROCESSABLE_CONTENT,
+                "Content unprocessable",
+                "FILE_PROCESSING_FAILED",
+                request
+        );
     }
 
     @ExceptionHandler(TooEarlyException.class)
-    public ProblemDetail handleTooEarlyException(TooEarlyException ex, WebRequest request) {
-        return buildProblemDetail(HttpStatus.TOO_EARLY, ex, "TOO_EARLY", request);
+    public ProblemDetail handleTooEarlyException(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.TOO_EARLY,
+                "Processing haven't finished yet",
+                "TOO_EARLY",
+                request
+        );
     }
 
     @ExceptionHandler(UnsupportedMediaFormatException.class)
-    public ProblemDetail handleUnsupportedMediaFormat(UnsupportedMediaFormatException ex, WebRequest request) {
-        return buildProblemDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex, "UNSUPPORTED_MEDIA_TYPE", request);
+    public ProblemDetail handleUnsupportedMediaFormat(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Provided Media Type is not supported",
+                "UNSUPPORTED_MEDIA_TYPE",
+                request
+        );
     }
 
     @ExceptionHandler(JobProcessingException.class)
-    public ProblemDetail handleJobProcessingException(JobProcessingException ex, WebRequest request) {
-        return buildProblemDetail(HttpStatus.BAD_REQUEST, ex, "JOB_PROCESSING_FAILED", request);
-    }
-
-
-
-    private ProblemDetail buildProblemDetail(
-            HttpStatus status,
-            Exception ex,
-            String errorCode,
-            WebRequest request) {
-        String message = ex.getMessage();
-        String path = request.getDescription(false).replaceAll("uri=", "");
-        Instant timestamp = Instant.now();
-
-        ProblemDetail pd = ProblemDetail.forStatus(status);
-        pd.setType(URI.create("about:blank"));
-        pd.setTitle(status.getReasonPhrase());
-        pd.setDetail(Optional.ofNullable(message).orElse("UnexpectedError"));
-        pd.setProperty("errorCode", errorCode);
-        pd.setProperty("timestamp", timestamp.toString());
-        pd.setInstance(URI.create(path));
-
-        return pd;
+    public ProblemDetail handleJobProcessingException(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                "Job Processing Failed",
+                "JOB_PROCESSING_FAILED",
+                request
+        );
     }
 }
