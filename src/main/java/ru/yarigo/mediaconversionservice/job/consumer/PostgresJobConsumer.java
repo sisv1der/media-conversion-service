@@ -75,10 +75,10 @@ public class PostgresJobConsumer implements JobConsumer {
 
         try (var inputStream = download(job.getInputS3Key())) {
             Files.copy(inputStream, inputPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            markFailed(job);
+        } catch (IOException ex) {
+            markFailed(job, ex);
             deleteFileIfExists(inputPath, job.getId());
-            throw new JobProcessingException("Error downloading input file " + job.getInputS3Key(), e);
+            throw new JobProcessingException("Error downloading input file " + job.getInputS3Key(), ex);
         }
 
         var outputFormat = mediaFormatMapper.map(job.getOutputFormat());
@@ -100,7 +100,7 @@ public class PostgresJobConsumer implements JobConsumer {
             job.setOutputS3Key(outputKey);
             markDone(job);
         } catch (Exception ex) {
-            markFailed(job);
+            markFailed(job, ex);
             log.warn("Error converting input file {} to {} from {} to {}",
                     inputPath,
                     outputPath,
@@ -162,8 +162,9 @@ public class PostgresJobConsumer implements JobConsumer {
         }
     }
 
-    private void markFailed(JobEntity jobEntity) {
+    private void markFailed(JobEntity jobEntity, Throwable cause) {
         jobEntity.setStatus(JobStatus.FAILED);
+        jobEntity.setErrorMessage(cause.getMessage());
         jobRepository.save(jobEntity);
     }
 
