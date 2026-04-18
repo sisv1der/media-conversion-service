@@ -14,9 +14,9 @@ public class WorkerConfig {
     @Bean("conversionExecutor")
     public ThreadPoolTaskExecutor conversionExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(10);
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("conversion-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
