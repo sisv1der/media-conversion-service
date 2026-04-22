@@ -1,46 +1,49 @@
 package ru.yarigo.mediaconversionservice.job.processor;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormatMapper;
-import ru.yarigo.mediaconversionservice.media.conversion.exception.ConversionException;
-import ru.yarigo.mediaconversionservice.media.conversion.service.ConversionService;
+import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
+import ru.yarigo.mediaconverionservice.conversion.exception.ConversionException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
-import ru.yarigo.mediaconversionservice.job.model.JobEntity;
-import ru.yarigo.mediaconversionservice.job.model.JobRepository;
+import ru.yarigo.mediaconversionservice.job.model.JobEvent;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
+import ru.yarigo.mediaconversionservice.media.conversion.MediaFormatMapper;
+import ru.yarigo.mediaconversionservice.media.conversion.service.ConversionService;
+import ru.yarigo.mediaconversionservice.service.StorageService;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
-import ru.yarigo.mediaconversionservice.storage.service.StorageService;
 import ru.yarigo.mediaconversionservice.workspace.InputStreamWorkspace;
 import ru.yarigo.mediaconversionservice.workspace.WorkspaceException;
-
-import static ru.yarigo.mediaconversionservice.storage.util.KeyGenerator.outputKey;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-@Slf4j
+import static ru.yarigo.mediaconversionservice.storage.util.KeyGenerator.outputKey;
+
 @Service
-@RequiredArgsConstructor
-public class JobProcessorImpl implements JobProcessor<JobEntity> {
+public class JobProcessorImpl implements JobProcessor<JobEvent> {
+
+    private final Logger logger = LoggerFactory.getLogger(JobProcessorImpl.class);
 
     private final StorageService storageService;
     private final ConversionService conversionService;
-    private final JobRepository jobRepository;
     private final MediaFormatMapper mediaFormatMapper;
     private final InputStreamWorkspace workspace;
 
-    @Transactional
-    public void process(JobEntity job) {
-        var inputFormat = mediaFormatMapper.map(job.getInputFormat());
-        var outputFormat = mediaFormatMapper.map(job.getOutputFormat());
-        try (var inputStream = storageService.download(job.getInputS3Key())) {
-            markDone(
+    public JobProcessorImpl(StorageService storageService, ConversionService conversionService, MediaFormatMapper mediaFormatMapper, InputStreamWorkspace workspace) {
+        this.storageService = storageService;
+        this.conversionService = conversionService;
+        this.mediaFormatMapper = mediaFormatMapper;
+        this.workspace = workspace;
+    }
+
+    public JobEvent process(JobEvent job) {
+        var inputFormat = mediaFormatMapper.map(job.inputFormat());
+        var outputFormat = mediaFormatMapper.map(job.outputFormat());
+        try (var inputStream = storageService.download(job.inputS3Key())) {
+            return markDone(
                     workspace.execute(
                             inputStream,
                             "processing-",
@@ -49,26 +52,25 @@ public class JobProcessorImpl implements JobProcessor<JobEntity> {
                                 var output = createTempFile(
                                         "processing-output-",
                                         "." + outputFormat.getExtension(),
-                                        job.getId()
+                                        job.jobId()
                                 );
 
                                 convert(input, output, inputFormat, outputFormat);
 
                                 var outputKey = outputKey(
-                                        job.getId(),
-                                        job.getOutputFormat().name()
+                                        job.jobId(),
+                                        job.outputFormat().name()
                                 );
                                 upload(outputKey, output);
-                                job.setOutputS3Key(outputKey);
 
                                 deleteFile(output);
 
-                                return job;
+                                return job.withOutputS3Key(outputKey);
                     })
             );
         } catch (IOException | WorkspaceException e ) {
-            markFailed(job, e);
-            throw new JobProcessingException("Error while job processing: " + job.getId(), e);
+            logger.debug("Error while job processing: {}", job.jobId(), e);
+            return markFailed(job, e);
         }
     }
 
@@ -80,22 +82,21 @@ public class JobProcessorImpl implements JobProcessor<JobEntity> {
         }
     }
 
-    private void markFailed(JobEntity jobEntity, Throwable cause) {
-        jobEntity.setStatus(JobStatus.FAILED);
-        jobEntity.setErrorMessage(cause.getMessage());
-        jobRepository.save(jobEntity);
+    private JobEvent markFailed(JobEvent job, Throwable cause) {
+        return job
+                .withStatus(JobStatus.FAILED)
+                .withErrorMessage(cause.getMessage());
     }
 
-    private void markDone(JobEntity jobEntity) {
-        jobEntity.setStatus(JobStatus.DONE);
-        jobRepository.save(jobEntity);
+    private JobEvent markDone(JobEvent job) {
+        return job.withStatus(JobStatus.DONE);
     }
 
     private Path createTempFile(String prefix, String suffix, UUID jobId) {
         try {
             return Files.createTempFile(prefix, suffix);
         } catch (IOException e) {
-            log.warn("Failed to create temporary file {} for job {}", prefix, jobId, e);
+            logger.debug("Failed to create temporary file {} for job {}", prefix, jobId, e);
             throw new JobProcessingException("Error creating temporary file for job " + jobId, e);
         }
     }
