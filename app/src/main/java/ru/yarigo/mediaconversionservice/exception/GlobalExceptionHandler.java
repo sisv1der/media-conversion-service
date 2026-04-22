@@ -6,8 +6,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import ru.yarigo.mediaconversionservice.media.conversion.exception.UnsupportedMediaFormatException;
 import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
+import ru.yarigo.mediaconversionservice.job.exception.JobAlreadyProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 
@@ -45,22 +45,22 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(UnsupportedMediaFormatException.class)
-    public ProblemDetail handleUnsupportedMediaFormat(WebRequest request) {
-        return getProblemDetail(
-                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                "Provided Media Type is not supported",
-                "UNSUPPORTED_MEDIA_TYPE",
-                request
-        );
-    }
-
     @ExceptionHandler(JobProcessingException.class)
     public ProblemDetail handleJobProcessingException(WebRequest request) {
         return getProblemDetail(
                 HttpStatus.BAD_REQUEST,
-                "Job Processing Failed",
+                "Job processing failed",
                 "JOB_PROCESSING_FAILED",
+                request
+        );
+    }
+
+    @ExceptionHandler(JobAlreadyProcessingException.class)
+    public ProblemDetail handleJobAlreadyProcessingException(WebRequest request) {
+        return getProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                "Job already being processed",
+                "JOB_ALREADY_PROCESSING",
                 request
         );
     }

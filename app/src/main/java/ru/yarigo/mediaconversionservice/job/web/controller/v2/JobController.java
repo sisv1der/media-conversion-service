@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormat;
+import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.job.service.JobService;
 
 import java.util.List;
@@ -22,8 +22,7 @@ import static org.springframework.http.ResponseEntity.ok;
                 "http://localhost:3000",
                 "http://localhost:5500",
                 "http://localhost:5173",
-                "https://svivy.ru",
-                "http://svivy.ru"
+                "https://svivy.ru"
         },
         exposedHeaders = {
                 "Content-Disposition"
@@ -63,5 +62,11 @@ public class JobController {
     @GetMapping
     public ResponseEntity<?> getJobs(@RequestParam List<UUID> ids) {
         return ok(jobService.getByIds(ids));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> claimJob(@RequestParam UUID jobId) {
+        jobService.claimJob(jobId);
+        return ok().build();
     }
 }

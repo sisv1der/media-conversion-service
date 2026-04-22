@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormatMapper;
+import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.job.JobMapper;
 import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
+import ru.yarigo.mediaconversionservice.job.exception.JobAlreadyProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.ValidationException;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
@@ -20,7 +20,6 @@ import ru.yarigo.mediaconversionservice.job.model.JobRepository;
 import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
-import ru.yarigo.mediaconversionservice.media.validation.service.ValidationService;
 import ru.yarigo.mediaconversionservice.workspace.FileWorkspace;
 
 import static ru.yarigo.mediaconversionservice.storage.util.KeyGenerator.inputKey;
@@ -36,11 +35,10 @@ import java.util.UUID;
 public class JobService {
 
     private final JobRepository jobRepository;
-    private final ValidationService validationService;
     private final StorageService storageService;
-    private final MediaFormatMapper mediaFormatMapper;
     private final JobMapper jobMapper;
     private final FileWorkspace<MultipartFile> workspace;
+    private final MediaFormatMapper mediaFormatMapper;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -76,7 +74,6 @@ public class JobService {
                 inputPath -> {
 
                     validateFile(file);
-                    validateBeforeConversion(inputPath, outputFormat);
 
                     var jobId = UUID.randomUUID();
                     var inputKey = inputKey(jobId, file.getOriginalFilename());
@@ -103,6 +100,16 @@ public class JobService {
                 .toList());
     }
 
+    @Transactional
+    public void claimJob(UUID jobId) {
+        var job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new EntityNotFoundException("Job " + jobId + " not found"));
+        if (job.getStatus().equals(JobStatus.DONE) || job.getStatus().equals(JobStatus.PROCESSING)) {
+            throw new JobAlreadyProcessingException("Job " + jobId + " already claimed");
+        }
+        job.setStatus(JobStatus.PROCESSING);
+    }
+
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new ValidationException("File " + file.getOriginalFilename() + " is empty");
@@ -110,12 +117,6 @@ public class JobService {
         long SIZE_LIMIT = 50L * 1024L * 1024L; // 50MB
         if (file.getSize() > SIZE_LIMIT) {
             throw new ValidationException("File " + file.getOriginalFilename() + " is too large");
-        }
-    }
-
-    private void validateBeforeConversion(Path inputPath, MediaFormat requiredFormat) {
-        if (validationService.isNotValid(inputPath, requiredFormat)) {
-            throw new ValidationException("Provided file is not valid");
         }
     }
 
