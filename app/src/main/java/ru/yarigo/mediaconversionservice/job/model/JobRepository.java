@@ -11,23 +11,13 @@ import java.util.UUID;
 
 @Repository
 public interface JobRepository extends JpaRepository<JobEntity, UUID> {
-    @Modifying
-    @Query(
-            value = """
-                UPDATE conversion_jobs
-                SET status = 'PROCESSING'
-                WHERE id IN (
-                    SELECT id
-                    FROM conversion_jobs
-                    WHERE status = 'PENDING'
-                    FOR UPDATE SKIP LOCKED
-                    LIMIT :limit
-                )
-                RETURNING *
-            """,
-            nativeQuery = true
-    )
-    List<JobEntity> findByStatus(@Param("limit") int limit);
-
     List<JobEntity> findByIdIn(List<UUID> ids);
+
+    @Modifying(clearAutomatically = true)
+    @Query("update JobEntity j set j.status = :newStatus where j.id = :id and j.status = :status")
+    int updateJobStatusByIdAndStatus(
+            @Param("id") UUID id,
+            @Param("status") JobStatus status,
+            @Param("newStatus") JobStatus newStatus
+    );
 }

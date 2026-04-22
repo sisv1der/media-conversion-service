@@ -31,18 +31,25 @@
         <module>storage-core</module>
         <module>storage-spring</module>
         <module>app</module>
+        <module>worker</module>
+        <module>valcon-core</module>
+        <module>valcon-spring</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot Starter для всех модулей -->
+            <!-- Spring Boot Starter -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
-
-
+            <!-- MapStruct -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

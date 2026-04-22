@@ -4,23 +4,26 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormat;
-import ru.yarigo.mediaconversionservice.media.conversion.MediaFormatMapper;
+import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.job.JobMapper;
+import ru.yarigo.mediaconversionservice.job.event.JobStatusUpdatedEvent;
 import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
+import ru.yarigo.mediaconversionservice.job.exception.JobAlreadyProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.ValidationException;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.producer.KafkaJobProducer;
 import ru.yarigo.mediaconversionservice.job.web.dto.*;
 import ru.yarigo.mediaconversionservice.job.model.JobEntity;
 import ru.yarigo.mediaconversionservice.job.model.JobRepository;
 import ru.yarigo.mediaconversionservice.job.web.exception.TooEarlyException;
 import ru.yarigo.mediaconversionservice.storage.exception.S3StorageException;
 import ru.yarigo.mediaconversionservice.storage.service.StorageService;
-import ru.yarigo.mediaconversionservice.media.validation.service.ValidationService;
 import ru.yarigo.mediaconversionservice.workspace.FileWorkspace;
 
 import static ru.yarigo.mediaconversionservice.storage.util.KeyGenerator.inputKey;
@@ -36,11 +39,12 @@ import java.util.UUID;
 public class JobService {
 
     private final JobRepository jobRepository;
-    private final ValidationService validationService;
     private final StorageService storageService;
-    private final MediaFormatMapper mediaFormatMapper;
     private final JobMapper jobMapper;
     private final FileWorkspace<MultipartFile> workspace;
+    private final MediaFormatMapper mediaFormatMapper;
+    private final KafkaJobProducer kafkaJobProducer;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -76,7 +80,6 @@ public class JobService {
                 inputPath -> {
 
                     validateFile(file);
-                    validateBeforeConversion(inputPath, outputFormat);
 
                     var jobId = UUID.randomUUID();
                     var inputKey = inputKey(jobId, file.getOriginalFilename());
@@ -87,7 +90,6 @@ public class JobService {
                             .inputFormat(mediaFormatMapper.map(inputFormat))
                             .outputFormat(mediaFormatMapper.map(outputFormat))
                             .build();
-
 
                     return save(inputPath, jobEntity);
         });
@@ -103,6 +105,28 @@ public class JobService {
                 .toList());
     }
 
+    @Transactional
+    public int updateJobStatus(UUID jobId, JobStatus status, JobEvent event) {
+        int updated = jobRepository.updateJobStatusByIdAndStatus(jobId, status, event.status());
+
+        if (updated != 0) {
+            eventPublisher.publishEvent(new JobStatusUpdatedEvent(jobId, event.status(), event.errorMessage()));
+        }
+
+        return updated;
+    }
+
+    @Transactional
+    public void claimJob(UUID jobId) {
+        int updated = jobRepository.updateJobStatusByIdAndStatus(jobId, JobStatus.PENDING, JobStatus.PROCESSING);
+
+        if (updated != 0) {
+            eventPublisher.publishEvent(new JobStatusUpdatedEvent(jobId, JobStatus.PROCESSING, ""));
+        } else {
+            throw new JobAlreadyProcessingException("Job " + jobId + " already claimed");
+        }
+    }
+
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new ValidationException("File " + file.getOriginalFilename() + " is empty");
@@ -113,18 +137,13 @@ public class JobService {
         }
     }
 
-    private void validateBeforeConversion(Path inputPath, MediaFormat requiredFormat) {
-        if (validationService.isNotValid(inputPath, requiredFormat)) {
-            throw new ValidationException("Provided file is not valid");
-        }
-    }
-
     private JobEntity save(
             Path inputPath,
             JobEntity job
     ) {
         upload(job.getInputS3Key(), inputPath);
         saveToDb(job);
+        kafkaJobProducer.produce(jobMapper.toEvent(job));
         return job;
     }
 

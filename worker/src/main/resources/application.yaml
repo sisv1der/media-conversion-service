@@ -1,0 +1,40 @@
+spring:
+  main:
+    web-application-type: none
+  application:
+    name: worker
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: worker-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 1
+    listener:
+      ack-mode: manual_immediate
+
+logging:
+  level:
+    root: INFO
+    ru.yarigo: DEBUG
+
+worker:
+  concurrency:
+    threads: 4
+  kafka:
+    topics:
+      input: jobs.in
+      output: jobs.out
+  api:
+    uri: http://localhost:8080
+
+storage:
+  type: s3
+aws:
+  s3:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    bucket: conversions
+    access-key: s3admin
+    secret-key: s3admin1
+    path-style-access: true
