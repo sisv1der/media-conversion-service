@@ -1,4 +1,7 @@
-package ru.yarigo.mediaconversionservice.job.model;
+package ru.yarigo.mediaconversionservice.kafka;
+
+import ru.yarigo.mediaconversionservice.job.model.JobStatus;
+import ru.yarigo.mediaconversionservice.job.model.MediaFormat;
 
 import java.util.UUID;
 

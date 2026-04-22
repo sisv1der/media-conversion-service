@@ -1,9 +1,9 @@
-package ru.yarigo.mediaconversionservice.job.producer;
+package ru.yarigo.mediaconversionservice.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.config.worker.kafka.KafkaTopicProperties;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.config.KafkaTopicProperties;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 
 @Service
 public class KafkaJobProducer implements Producer<JobEvent> {
@@ -19,7 +19,7 @@ public class KafkaJobProducer implements Producer<JobEvent> {
     @Override
     public void produce(JobEvent event) {
         kafkaTemplate.send(
-                props.getTopics().getOutput(),
+                props.getTopics().getInput(),
                 event.jobId().toString(),
                 event
         );

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconverionservice.conversion.exception.ConversionException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
 import ru.yarigo.mediaconversionservice.media.conversion.MediaFormatMapper;
 import ru.yarigo.mediaconversionservice.media.conversion.service.ConversionService;

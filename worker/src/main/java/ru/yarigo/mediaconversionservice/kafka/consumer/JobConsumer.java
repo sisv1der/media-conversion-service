@@ -1,17 +1,16 @@
-package ru.yarigo.mediaconversionservice.job.consumer;
+package ru.yarigo.mediaconversionservice.kafka.consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
-import ru.yarigo.mediaconversionservice.job.producer.Producer;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.producer.Producer;
 import ru.yarigo.mediaconversionservice.job.service.JobClaimService;
 import ru.yarigo.mediaconversionservice.job.service.JobService;
 
 import static ru.yarigo.mediaconversionservice.job.model.JobStatus.FAILED;
-import static ru.yarigo.mediaconversionservice.job.model.JobStatus.PROCESSING;
 
 @Service
 public class JobConsumer {
@@ -40,7 +39,6 @@ public class JobConsumer {
                                 ack.acknowledge();
                                 return;
                             }
-                            producer.produce(event.withStatus(PROCESSING));
 
                             jobService.process(event)
                                     .thenAccept(producer::produce)

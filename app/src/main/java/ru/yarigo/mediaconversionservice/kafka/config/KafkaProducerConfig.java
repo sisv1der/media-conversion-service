@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.config.worker.kafka;
+package ru.yarigo.mediaconversionservice.kafka.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -9,7 +9,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -6,7 +6,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import ru.yarigo.mediaconversionservice.config.worker.ApiProperties;
 import ru.yarigo.mediaconversionservice.job.exception.JobClaimingException;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,7 +40,7 @@ public class JobClaimService {
         try {
             var request = HttpRequest.newBuilder()
                     .uri(new URI(apiProperties.getUri() + "/v2/jobs/" + event.jobId() + "/claim"))
-                    .GET()
+                    .method("Patch", HttpRequest.BodyPublishers.noBody())
                     .build();
 
             return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())

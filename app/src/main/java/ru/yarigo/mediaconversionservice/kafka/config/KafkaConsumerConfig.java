@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.config.worker.kafka;
+package ru.yarigo.mediaconversionservice.kafka.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -12,7 +12,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 
 import java.util.HashMap;
 import java.util.Map;

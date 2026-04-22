@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.config.worker.kafka;
+package ru.yarigo.mediaconversionservice.kafka.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

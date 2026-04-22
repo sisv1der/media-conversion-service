@@ -4,16 +4,20 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yarigo.mediaconverionservice.conversion.MediaFormat;
 import ru.yarigo.mediaconversionservice.job.JobMapper;
+import ru.yarigo.mediaconversionservice.job.event.JobStatusUpdatedEvent;
 import ru.yarigo.mediaconversionservice.job.exception.FileProcessingFailedException;
 import ru.yarigo.mediaconversionservice.job.exception.JobAlreadyProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.JobProcessingException;
 import ru.yarigo.mediaconversionservice.job.exception.ValidationException;
 import ru.yarigo.mediaconversionservice.job.model.JobStatus;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.producer.KafkaJobProducer;
 import ru.yarigo.mediaconversionservice.job.web.dto.*;
 import ru.yarigo.mediaconversionservice.job.model.JobEntity;
 import ru.yarigo.mediaconversionservice.job.model.JobRepository;
@@ -39,6 +43,8 @@ public class JobService {
     private final JobMapper jobMapper;
     private final FileWorkspace<MultipartFile> workspace;
     private final MediaFormatMapper mediaFormatMapper;
+    private final KafkaJobProducer kafkaJobProducer;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FileResource getFileByJobId(UUID jobId) {
         var job = jobRepository.findById(jobId)
@@ -85,7 +91,6 @@ public class JobService {
                             .outputFormat(mediaFormatMapper.map(outputFormat))
                             .build();
 
-
                     return save(inputPath, jobEntity);
         });
 
@@ -101,13 +106,25 @@ public class JobService {
     }
 
     @Transactional
+    public int updateJobStatus(UUID jobId, JobStatus status, JobEvent event) {
+        int updated = jobRepository.updateJobStatusByIdAndStatus(jobId, status, event.status());
+
+        if (updated != 0) {
+            eventPublisher.publishEvent(new JobStatusUpdatedEvent(jobId, event.status(), event.errorMessage()));
+        }
+
+        return updated;
+    }
+
+    @Transactional
     public void claimJob(UUID jobId) {
-        var job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new EntityNotFoundException("Job " + jobId + " not found"));
-        if (job.getStatus().equals(JobStatus.DONE) || job.getStatus().equals(JobStatus.PROCESSING)) {
+        int updated = jobRepository.updateJobStatusByIdAndStatus(jobId, JobStatus.PENDING, JobStatus.PROCESSING);
+
+        if (updated != 0) {
+            eventPublisher.publishEvent(new JobStatusUpdatedEvent(jobId, JobStatus.PROCESSING, ""));
+        } else {
             throw new JobAlreadyProcessingException("Job " + jobId + " already claimed");
         }
-        job.setStatus(JobStatus.PROCESSING);
     }
 
     private void validateFile(MultipartFile file) {
@@ -126,6 +143,7 @@ public class JobService {
     ) {
         upload(job.getInputS3Key(), inputPath);
         saveToDb(job);
+        kafkaJobProducer.produce(jobMapper.toEvent(job));
         return job;
     }
 

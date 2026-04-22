@@ -3,7 +3,7 @@ package ru.yarigo.mediaconversionservice.job.service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import ru.yarigo.mediaconversionservice.job.model.JobEvent;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 import ru.yarigo.mediaconversionservice.job.processor.JobProcessor;
 
 import java.util.concurrent.CompletableFuture;

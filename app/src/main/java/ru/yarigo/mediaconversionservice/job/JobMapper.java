@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Mappings;
 import ru.yarigo.mediaconversionservice.job.model.JobEntity;
+import ru.yarigo.mediaconversionservice.kafka.JobEvent;
 import ru.yarigo.mediaconversionservice.job.web.dto.ReadJobStatusResponse;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -15,4 +16,7 @@ public interface JobMapper {
             @Mapping(target = "jobStatus", source = "status")
     })
     ReadJobStatusResponse map(JobEntity job);
+
+    @Mapping(source = "id", target = "jobId")
+    JobEvent toEvent(JobEntity job);
 }

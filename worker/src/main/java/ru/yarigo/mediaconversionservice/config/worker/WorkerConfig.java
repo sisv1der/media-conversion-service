@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import ru.yarigo.mediaconversionservice.config.worker.kafka.KafkaTopicProperties;
+import ru.yarigo.mediaconversionservice.kafka.config.KafkaTopicProperties;
 
 import java.util.concurrent.ThreadPoolExecutor;
 

@@ -1,4 +1,4 @@
-package ru.yarigo.mediaconversionservice.job.producer;
+package ru.yarigo.mediaconversionservice.kafka.producer;
 
 public interface Producer<T> {
 
