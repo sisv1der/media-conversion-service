@@ -14,7 +14,11 @@ public interface JobRepository extends JpaRepository<JobEntity, UUID> {
     List<JobEntity> findByIdIn(List<UUID> ids);
 
     @Modifying(clearAutomatically = true)
-    @Query("update JobEntity j set j.status = :newStatus where j.id = :id and j.status = :status")
+    @Query("""
+        update JobEntity j
+        set j.status = :newStatus, j.processedAt = current_timestamp
+        where j.id = :id and j.status = :status
+    """)
     int updateJobStatusByIdAndStatus(
             @Param("id") UUID id,
             @Param("status") JobStatus status,
